@@ -155,7 +155,7 @@
                         <div class="input-group input-group-sm mb-3">
                             <button type="button" class="btn btn-primary" id="btn_undo" onClick="undo()">
                                 <i class="fa-solid fa-arrow-rotate-left"></i>
-                                Deshacer
+                                Eliminar último
                             </button>
                         </div>
 
@@ -197,7 +197,8 @@
                         </canvas>
 
                         <img hidden id="watermark" name="watermark" alt="watermark" class="watermark"
-                            src="http://www.perspective.com.mx/img/logo.png">
+                            src="logo.png">
+                            <!-- src="http://www.perspective.com.mx/img/logo.png" -->
                         <!-- src="https://programacion.net/files/article/20151127011102_watermark.png"  -->
 
                     </div>
@@ -205,8 +206,6 @@
             </div>
         </div>
     </div>
-
-
 
     <script>
         // $(document).on("change", "#canvas_height", function () {
@@ -330,6 +329,10 @@
             cx.save();
             // Dibuja objetos
             for (var i = 0; i < objetos.length; i++) {
+                // for (var i = objetos.length - 1; i >= 0; i--) {
+                // console.log('objetos.length:' + objetos.length);
+                // console.log('i:' + i);
+
                 // cx.fillStyle = objetos[i].color;
                 // Pone el color seleccionado
                 cx.fillStyle = selected_color;
@@ -351,6 +354,51 @@
             cx.restore();
         }
 
+
+        // Función que mueve el elemento cuando el seelctor esta activo
+        function selectObject() {
+            // Recorre todos los objetos
+            // for (var i = 0; i < objetos.length; i++) {
+            for (var i = objetos.length - 1; i >= 0; i--) {
+                // Revisa que se haya dado clic en un objeto
+                if (objetos[i].x < event.clientX
+                    && (objetos[i].width + objetos[i].x > event.clientX)
+                    && objetos[i].y < event.clientY
+                    && (objetos[i].height + objetos[i].y > event.clientY)
+                ) {
+                    // console.log("objetos[" + i + "].y[" + objetos[i].y
+                    //     + "].x[" + objetos[i].x
+                    //     + "].height[" + objetos[i].height
+                    //     + "].width[" + objetos[i].width + "]");
+                    // console.log("event.clientYX " + event.clientY + ", " + event.clientX);
+
+                    // Pone el seleccionado como objeto actual
+                    objetoActual = objetos[i];
+                    objetoActualNum = i;
+
+                    // Cambioa inicioY e inicioX
+                    inicioY = event.clientY - objetos[i].y;
+                    inicioX = event.clientX - objetos[i].x;
+                    // console.log("inicioYX " + inicioY + ", " + inicioX);
+                    break;
+                }
+            }
+
+        }
+
+        // Función que mueve el elemento cuando el seelctor esta activo
+        function moveObject() {
+            if (objetoActual != null) {
+                canvasY = event.clientY;
+                canvasX = event.clientX;
+                objetoActual.x = event.clientX - inicioX;
+                objetoActual.y = event.clientY - inicioY;
+                if (isMousePressed) {
+                    actualizar();
+                }
+            }
+        }
+
         // Función que eliminar el último objeto agregado
         function undo() {
             // console.log("Undo En desarrollo..." + objetos.length);
@@ -365,8 +413,16 @@
             actualizar();
         }
 
+        // Función que convierte el canvas a imagen y la descarga
         function download() {
-            alert("Download En desarrollo...");
+            // Crear un elemento <a>
+            let enlace = document.createElement('a');
+            // El título
+            enlace.download = "Canvas.png";
+            // Convertir la imagen a Base64 y ponerlo en el enlace
+            enlace.href = cv.toDataURL("image/png");	
+            // Hacer click en él
+            enlace.click();
         }
 
         function viewObjects() {
@@ -376,6 +432,7 @@
                     + ', y:' + objetos[i].y
                     + ', width:' + objetos[i].width
                     + ', height:' + objetos[i].height
+                    + ', type:' + objetos[i].type
                 );
             }
 
@@ -470,12 +527,8 @@
 
                 x: mouseDown_pos[0], y: mouseDown_pos[1],
                 width: mouseUp_pos[0] - mouseDown_pos[0], height: mouseUp_pos[1] - mouseDown_pos[1],
+                type: null,
 
-
-                color: selected_color
-                // x: 300, y: 0,
-                // width: 100, height: 300,
-                // color: '#00f'
             });
         }
 
@@ -508,56 +561,25 @@
                 isMousePressed = true;
                 // Guarda la posicion donde se dio click al mouse
                 mouseDown_pos = [event.clientX, event.clientY]
-                console.log("mouseDown_pos: " + mouseDown_pos);
+                // console.log("mouseDown_pos: " + mouseDown_pos);
 
                 // radioSelected(event);
                 // console.log("event.clientXY " + event.clientY + ", " + event.clientX);
-                // Recorre todos los objetos
-                for (var i = 0; i < objetos.length; i++) {
-                    // Revisa que se haya dado clic en un objeto
-                    if (objetos[i].x < event.clientX
-                        && (objetos[i].width + objetos[i].x > event.clientX)
-                        && objetos[i].y < event.clientY
-                        && (objetos[i].height + objetos[i].y > event.clientY)
-                    ) {
-                        // console.log("objetos[" + i + "].y[" + objetos[i].y
-                        //     + "].x[" + objetos[i].x
-                        //     + "].height[" + objetos[i].height
-                        //     + "].width[" + objetos[i].width + "]");
-                        // console.log("event.clientYX " + event.clientY + ", " + event.clientX);
 
-                        // Pone el seleccionado como objeto actual
-                        objetoActual = objetos[i];
-                        objetoActualNum = i;
+                selectObject();
 
-                        // Cambioa inicioY e inicioX
-                        inicioY = event.clientY - objetos[i].y;
-                        inicioX = event.clientX - objetos[i].x;
-                        // console.log("inicioYX " + inicioY + ", " + inicioX);
-                        break;
-                    }
-                }
 
             }
 
             // Cuando se mueve el mouse en el canvas
             cv.onmousemove = function (event) {
-
                 // actualiza la posicion donde se movio al mouse
                 // mouseDown_pos = [event.clientX, event.clientY]
                 // mouseUp_pos = [event.clientX, event.clientY]
 
-                if (objetoActual != null) {
-                    canvasY = event.clientY;
-                    canvasX = event.clientX;
-                    objetoActual.x = event.clientX - inicioX;
-                    objetoActual.y = event.clientY - inicioY;
-                    if (isMousePressed) {
-                        actualizar();
-                    }
+                if (radioSelect == 'selector') {
+                    moveObject();
                 }
-
-
             }
 
             // Cuando se suelta el mouse en el canvas

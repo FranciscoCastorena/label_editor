@@ -180,6 +180,24 @@
                                 <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
                             </label>
                             <!-- </div> -->
+
+                            <!-- <div class="row"> -->
+                                <label>
+                                    <input type="radio" id="radioSelect_line" name="radioSelect"
+                                        value="line">
+                                    \
+                                    <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
+                                </label>
+                                <!-- </div> -->
+    
+                                <!-- <div class="row"> -->
+                                <label>
+                                    <input type="radio" id="radioSelect_rectangleStroke" name="radioSelect"
+                                        value="rectangleStroke">
+                                    ▭
+                                    <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
+                                </label>
+                                <!-- </div> -->
                         </div>
                     </div>
                     <!-- ./ end FIGURES -->
@@ -188,7 +206,7 @@
                         <div class="input-group input-group-sm mb-3">
                             <button type="button" class="btn btn-primary" id="btn_undo" onClick="undo()">
                                 <i class="fa-solid fa-arrow-rotate-left"></i>
-                                Eliminar último
+                                Eliminar <br>último
                             </button>
                         </div>
 
@@ -214,6 +232,27 @@
                         </div>
                     </div>
 
+                </div>
+                <!-- ./ end ROW-->
+
+                <div class="row">
+                    <!-- CANVAS -->
+                    <div class="col-md-9">
+                        <!-- TEXT -->
+                        <!-- <h4 class="text-center">TEXTO: </h4> -->
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="input_text">
+                                    Texto
+                                </label>
+                            </div>
+                            <input type="text" name="input_text" id="input_text" min="100" max="1000"
+                                class="form-control text-input" placeholder="">
+                        </div>
+                        <!-- ./ end SIZE -->
+
+                    </div>
+                    <!-- ./ end CANVAS -->
                 </div>
                 <!-- ./ end ROW-->
             </div>
@@ -342,6 +381,16 @@
             radioSelect = $(this).val();
         });
 
+        // Detecta cuando cambia el radio button
+        $("#input_text").change(function () {
+            // Actualiza para saber que radio esta activo
+            console.log($(this).val());
+
+            objetoText = $(this).val()
+            // radioSelect = $(this).val();
+            // objetoText
+        });
+
         //{
         // Actualiza la altura del canvas y de la marca de agua
         // $("#canvas_height").bind("keyup change", function () {
@@ -401,6 +450,8 @@
             // Define el tamaño del fondo
             cx.fillRect(0, 0, canvas_width, canvas_height);
 
+            cx.textBaseline = 'top';
+
             cx.save();
             // Dibuja objetos
             for (var i = 0; i < objetos.length; i++) {
@@ -425,8 +476,18 @@
                     // cx.beginPath() //iniciar ruta
                     // cx.font = "bold 20px arial"; //estilo de texto
                     cx.font = objetos[i].font;
-                    cx.strokeText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y + 20); //texto con método stroke
-                    cx.fillText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y); //texto con método fill
+                    // cx.strokeText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y + 20); //texto con método stroke
+                    cx.fillText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height); //texto con método fill
+                }
+                else if (objetos[i].type == 'line') {
+                    //     // Las empieza a dibujar
+                    // cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                    cx.beginPath();
+                    cx.moveTo(objetos[i].x, objetos[i].y);
+                    cx.lineTo(objetos[i].width, objetos[i].height);
+                    cx.stroke();
+                    // cx.closePath();
+                    
                 }
 
                 // console.log("canvas_info.xy " + canvas_info.x + "," + canvas_info.y);
@@ -457,10 +518,9 @@
                 // console.log('i:' + i);
 
                 // cx.fillStyle = objetos[i].color;
-                // Pone el color seleccionado
+                // Pone el color seleccionado para el estilo delineado y el llenado
                 cx.fillStyle = selected_color;
                 cx.strokeStyle = selected_color;
-                console.log
 
                 if (objetos[i].type == 'rectangleStroke') {
                     // Las empieza a dibujar
@@ -469,6 +529,22 @@
                 else if (objetos[i].type == 'rectangleFill') {
                     //     // Las empieza a dibujar
                     cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                }
+                else if (objetos[i].type == 'text') {
+                    // cx.beginPath() //iniciar ruta
+                    // cx.font = "bold 20px arial"; //estilo de texto
+                    cx.font = objetos[i].font;
+                    cx.strokeText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y + 20); //texto con método stroke
+                    cx.fillText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y); //texto con método fill
+                }
+                else if (objetos[i].type == 'line') {
+                    //     // Las empieza a dibujar
+                    // cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                    ctx.beginPath();
+                    ctx.moveTo(objetos[i].x, objetos[i].y);
+                    ctx.lineTo(objetos[i].width, objetos[i].height);
+                    ctx.closePath();
+                    ctx.stroke();
                 }
 
                 // console.log("canvas_info.xy " + canvas_info.x + "," + canvas_info.y);
@@ -555,6 +631,8 @@
                     + ', width:' + objetos[i].width
                     + ', height:' + objetos[i].height
                     + ', type:' + objetos[i].type
+                    + ', text:' + objetos[i].text
+                    + ', font:' + objetos[i].font
                 );
             }
         }
@@ -605,6 +683,11 @@
                 // llamar a la funcion de crear objeto
                 createObject(event);
             }
+            else if (radioSelect == "line") {
+                // console.log("3 " + radioSelect);
+                // llamar a la funcion de crear objeto
+                createObject(event);
+            }
             actualizar();
         }
 
@@ -629,14 +712,13 @@
         function createObject(event) {
 
             //esto arregla un bug al momento de dibujar, intercambia los valores de cuando se presiona y cuando se suelta
-            if (mouseUp_pos[0] < mouseDown_pos[0]) {
+            // no aplica en texto
+            if (mouseUp_pos[0] < mouseDown_pos[0] && radioSelect != 'text') {
                 let temp = mouseUp_pos[0];
                 mouseUp_pos[0] = mouseDown_pos[0];
                 mouseDown_pos[0] = temp;
-            }
-
-            //esto arregla un bug al momento de dibujar, intercambia los valores de cuando se presiona y cuando se suelta
-            if (mouseUp_pos[1] < mouseDown_pos[1]) {
+            } //esto arregla un bug al momento de dibujar, intercambia los valores de cuando se presiona y cuando se suelta
+            if (mouseUp_pos[1] < mouseDown_pos[1] && radioSelect != 'text') {
                 let temp = mouseUp_pos[1];
                 mouseUp_pos[1] = mouseDown_pos[1];
                 mouseDown_pos[1] = temp;
@@ -651,7 +733,7 @@
                     type: radioSelect,
                 });
             }
-            else if (radioSelect == 'text') {
+            else if (radioSelect == 'text' && objetoText) {
                 // console.log('size: ' + selected_font_size);
                 // console.log('type: ' + selected_font_type);
 
@@ -659,18 +741,34 @@
                 let cx_temp = cx;
                 cx_temp.font = selected_font_size + " " + selected_font_type;
 
-                objetoText = "Hola mundo"; //texto de prueba
+                // objetoText = "Hola mundo"; //texto de prueba
+
+                let text = cx.measureText(objetoText);
+                console.log('text.actualBoundingBoxAscent' + text.actualBoundingBoxAscent);
+                console.log('text.actualBoundingBoxRight' + text.actualBoundingBoxRight);
+                console.log('text.actualBoundingBoxDescent' + text.actualBoundingBoxDescent);
+                
 
                 objetos.push({
-                    x: mouseDown_pos[0], y: mouseDown_pos[1],
+                    x: mouseUp_pos[0], y: mouseUp_pos[1],
                     // width: null, height: null,
-                    width: cx_temp.measureText(objetoText).width,
-                    height: cx_temp.measureText(objetoText).height,
+                    // width: cx_temp.measureText(objetoText).width,
+                    // height: cx_temp.measureText(objetoText).height,
+                    width: text.actualBoundingBoxRight,
+                    height: text.actualBoundingBoxDescent,
                     text: objetoText,
                     type: radioSelect,
                     font: selected_font_size + " " + selected_font_type,
                     // font: "bold 30px arial", //estilo de texto
 
+                });
+            }
+            else if (radioSelect == 'line') {
+                objetos.push({
+                    x: mouseDown_pos[0], y: mouseDown_pos[1],
+                    width: mouseUp_pos[0],
+                    height: mouseUp_pos[1],
+                    type: radioSelect,
                 });
             }
         }

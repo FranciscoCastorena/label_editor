@@ -81,8 +81,10 @@
                     <!-- </div> -->
                     <!-- ./ end CANVAS SIZE -->
 
-                    <!-- CANVAS SIZE -->
+                    <!-- CANVAS -->
                     <div class="col-md-3">
+                        <!-- SIZE -->
+                        <h4 class="text-center">CANVAS: </h4>
                         <div class="input-group input-group-sm mb-3">
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="
@@ -95,11 +97,9 @@
                                 <option value="2">400x800 px</option>
                             </select>
                         </div>
-                    </div>
-                    <!-- ./ end CANVAS SIZE -->
+                        <!-- ./ end SIZE -->
 
-                    <!-- COLOR -->
-                    <div class="col-md-3">
+                        <!-- COLOR -->
                         <div class="input-group input-group-sm mb-3">
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="ink_color">Color</label>
@@ -107,8 +107,41 @@
                             <select class="custom-select" id="ink_color" name="ink_color">
                             </select>
                         </div>
+                        <!-- ./ end COLOR -->
+
                     </div>
-                    <!-- ./ end COLOR -->
+                    <!-- ./ end CANVAS -->
+
+                    <!-- FONT -->
+                    <div class="col-md-3">
+                        <!-- SIZE -->
+                        <h4 class="text-center">FUENTE: </h4>
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="
+                                font_size">Tamaño</label>
+                            </div>
+                            <select class="custom-select" id="font_size" name="font_size">
+                                <!-- <option selected>Elige un tamaño...</option> -->
+                                <!-- <option value="0">300x300 px</option>
+                                <option value="1">400x500 px</option>
+                                <option value="2">400x800 px</option> -->
+                            </select>
+                        </div>
+                        <!-- ./ end SIZE -->
+
+                        <!-- TYPE -->
+                        <div class="input-group input-group-sm mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="font_type">Tipo</label>
+                            </div>
+                            <select class="custom-select" id="font_type" name="font_type">
+                            </select>
+                        </div>
+                        <!-- ./ end TYPE -->
+
+                    </div>
+                    <!-- ./ end FONT -->
 
                     <!-- FIGURES -->
                     <div class="col-md-2">
@@ -196,9 +229,8 @@
                             Your browser does not support Canvas.
                         </canvas>
 
-                        <img hidden id="watermark" name="watermark" alt="watermark" class="watermark"
-                            src="logo.png">
-                            <!-- src="http://www.perspective.com.mx/img/logo.png" -->
+                        <img hidden id="watermark" name="watermark" alt="watermark" class="watermark" src="logo.png">
+                        <!-- src="http://www.perspective.com.mx/img/logo.png" -->
                         <!-- src="https://programacion.net/files/article/20151127011102_watermark.png"  -->
 
                     </div>
@@ -213,13 +245,15 @@
         var heights = ['300', '400', '400'];
         var widths = ['300', '500', '800'];
         var colors = ['black', 'red', 'blue'];
+        var font_sizes = ['20px', '30px', '40px'];
+        var font_types = ['Arial', 'Times New Roman', 'Courier New'];
 
+        // Define estos valores por defecto
         var canvas_height = heights[0];
         var canvas_width = widths[0];
-        var selected_color = '#000000';
-
-        var canvasX = 0;
-        var canvasY = 0;
+        var selected_color = colors[0];
+        var selected_font_size = font_sizes[0];
+        var selected_font_type = font_types[0];
 
         // almacena cual opcion de radio button esta seleccionada
         var radioSelect = null;
@@ -228,10 +262,31 @@
         var mouseDown_pos = null;
         var mouseUp_pos = null;
 
+        // Guarda el estado del mouse como no presionado
         var isMousePressed = false;
 
-        //Array de objetos (texto, figuras...)
-        objetos = [];
+        // Array de objetos (texto, figuras...)
+        var objetos = [];
+
+        // Guarda la info del objeto actual (El seleccionado)
+        var objetoActual = null;
+
+        // Guarda la pos en el array de objetos del objeto actual
+        var objetoActualNum = null;
+
+        // Guarda que tipo de objeto es (texto, rectangle...)
+        var objetoType = null;
+
+        // Guarda el texto que mostrará el objeto
+        var objetoText = null;
+
+        // Guarda el tag html canvas, y el contexto del canvas
+        var cv, cx;
+
+        var inicioX = 0, inicioY = 0;
+
+        // Guarda info del canvas (x, y, width, height,...)
+        var canvas_info = null;
 
         // Actualiza la altura y anchura del canvas y de la marca de agua
         $("#canvas_size").change("canvas_size", function () {
@@ -250,28 +305,41 @@
             document.getElementById('watermark').width = 100;
             document.getElementById('watermark').height = 100;
 
+            // actualiza el canvas
             actualizar();
         });
 
         // Actualiza el color
         $("#ink_color").change("ink_color", function () {
             // Valores simulados, obtener despues de la bd
-            ink_color = $("#ink_color").val();
+            let ink_color = $("#ink_color").val();
             selected_color = colors[ink_color];
             console.log(selected_color);
+
+            // actualiza el canvas
             actualizar();
         });
 
-        // Descarga img
-        // $("#btn_download").click(function () {
+        // Actualiza el tamaño de fuente
+        $("#font_size").change("font_size", function () {
+            // Valores simulados, obtener despues de la bd
+            let font_size = $("#font_size").val();
+            selected_font_size = font_sizes[font_size];
+            console.log(selected_font_size);
+        });
 
-        // alert("clic");
-        // });
+        // Rescata el tipo de fuente
+        $("#font_type").change("font_type", function () {
+            // Valores simulados, obtener despues de la bd
+            let font_type = $("#font_type").val();
+            selected_font_type = font_types[font_type];
+            console.log(selected_font_type);
+        });
 
         // Detecta cuando cambia el radio button
         $("input[name=radioSelect]").change(function () {
+            // Actualiza para saber que radio esta activo
             radioSelect = $(this).val();
-            // radioSelected();
         });
 
         //{
@@ -294,33 +362,88 @@
         // }); 
         // }
 
-        var cv, cx, objetos, objetoActual = null, objetoActualNum;
-        var inicioX = 0, inicioY = 0;
-        var canvas_info = null;
-
         function fillSelects() {
             let selectSize = document.getElementById('canvas_size');
             let selectColor = document.getElementById('ink_color');
-            console.log('fillSelects');
+            let selectFontSize = document.getElementById('font_size');
+            let selectFontType = document.getElementById('font_type');
+            // console.log('fillSelects');
 
             // llena el select de color
             for (var i = 0; i < colors.length; i++) {
-
                 var opt = document.createElement('option');
                 opt.text = colors[i];
                 opt.value = i;
                 selectColor.appendChild(opt);
+            }
 
+            // llena el select de fontSize
+            for (var i = 0; i < colors.length; i++) {
+                var opt = document.createElement('option');
+                opt.text = font_sizes[i];
+                opt.value = i;
+                selectFontSize.appendChild(opt);
+            }
 
-                // var option = document.createElement("option");
-                // option.text = "Text";
-                // option.value = "myvalue";
-                // var select = document.getElementById("id-to-my-select-box");
-                // select.appendChild(option);
+            // llena el select de fontType
+            for (var i = 0; i < colors.length; i++) {
+                var opt = document.createElement('option');
+                opt.text = font_types[i];
+                opt.value = i;
+                selectFontType.appendChild(opt);
             }
         }
 
+        // Función que actualiza el canvas
         function actualizar() {
+            // Dibuja el color del fondo
+            cx.fillStyle = '#f0f0f0';
+            // Define el tamaño del fondo
+            cx.fillRect(0, 0, canvas_width, canvas_height);
+
+            cx.save();
+            // Dibuja objetos
+            for (var i = 0; i < objetos.length; i++) {
+                // for (var i = objetos.length - 1; i >= 0; i--) {
+                // console.log('objetos.length:' + objetos.length);
+                // console.log('i:' + i);
+
+                // cx.fillStyle = objetos[i].color;
+                // Pone el color seleccionado para el estilo delineado y el llenado
+                cx.fillStyle = selected_color;
+                cx.strokeStyle = selected_color;
+
+                if (objetos[i].type == 'rectangleStroke') {
+                    // Las empieza a dibujar
+                    cx.strokeRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                }
+                else if (objetos[i].type == 'rectangleFill') {
+                    //     // Las empieza a dibujar
+                    cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                }
+                else if (objetos[i].type == 'text') {
+                    // cx.beginPath() //iniciar ruta
+                    // cx.font = "bold 20px arial"; //estilo de texto
+                    cx.font = objetos[i].font;
+                    cx.strokeText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y + 20); //texto con método stroke
+                    cx.fillText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y); //texto con método fill
+                }
+
+                // console.log("canvas_info.xy " + canvas_info.x + "," + canvas_info.y);
+                // console.log("objetos[" + i + "].xy " + objetos[i].x + "," + objetos[i].y);
+            }
+            cx.restore();
+
+            // Dibuja la marca de agua
+            cx.save();
+            cx.globalAlpha = 0.5;
+            var img = document.getElementById("watermark");
+            cx.drawImage(img, 0, 0, canvas_width, canvas_height);
+            cx.restore();
+        }
+
+        // Función que actualiza el canvas sin la marca de agua
+        function actualizar2() {
             // Dibuja el color del fondo
             cx.fillStyle = '#f0f0f0';
             // Define el tamaño del fondo
@@ -337,25 +460,25 @@
                 // Pone el color seleccionado
                 cx.fillStyle = selected_color;
                 cx.strokeStyle = selected_color;
+                console.log
 
-                // Las empieza a dibujar
-                cx.strokeRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                if (objetos[i].type == 'rectangleStroke') {
+                    // Las empieza a dibujar
+                    cx.strokeRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                }
+                else if (objetos[i].type == 'rectangleFill') {
+                    //     // Las empieza a dibujar
+                    cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                }
 
                 // console.log("canvas_info.xy " + canvas_info.x + "," + canvas_info.y);
                 // console.log("objetos[" + i + "].xy " + objetos[i].x + "," + objetos[i].y);
             }
             cx.restore();
-
-            // Dibuja la marca de agua
-            cx.save();
-            cx.globalAlpha = 0.5;
-            var img = document.getElementById("watermark");
-            cx.drawImage(img, 0, 0, canvas_width, canvas_height);
-            cx.restore();
         }
 
 
-        // Función que mueve el elemento cuando el seelctor esta activo
+        // Función que selecciona el objeto cuando el selector esta activo
         function selectObject() {
             // Recorre todos los objetos
             // for (var i = 0; i < objetos.length; i++) {
@@ -379,18 +502,16 @@
                     // Cambioa inicioY e inicioX
                     inicioY = event.clientY - objetos[i].y;
                     inicioX = event.clientX - objetos[i].x;
-                    // console.log("inicioYX " + inicioY + ", " + inicioX);
+                    // console.log("inicio YX " + inicioY + ", " + inicioX);
                     break;
                 }
             }
 
         }
 
-        // Función que mueve el elemento cuando el seelctor esta activo
+        // Función que mueve el elemento cuando el selector esta activo
         function moveObject() {
             if (objetoActual != null) {
-                canvasY = event.clientY;
-                canvasX = event.clientX;
                 objetoActual.x = event.clientX - inicioX;
                 objetoActual.y = event.clientY - inicioY;
                 if (isMousePressed) {
@@ -401,30 +522,31 @@
 
         // Función que eliminar el último objeto agregado
         function undo() {
-            // console.log("Undo En desarrollo..." + objetos.length);
             objetos.pop();
             actualizar();
         }
 
         // Función que limpia el canvas eliminando todo
         function clean() {
-            // console.log("Clean En desarrollo..." + objetos.length);
             objetos = [];
             actualizar();
         }
 
         // Función que convierte el canvas a imagen y la descarga
         function download() {
+            actualizar2();
             // Crear un elemento <a>
             let enlace = document.createElement('a');
-            // El título
+            // Agrega el título
             enlace.download = "Canvas.png";
-            // Convertir la imagen a Base64 y ponerlo en el enlace
-            enlace.href = cv.toDataURL("image/png");	
-            // Hacer click en él
+            // Convierte la imagen a Base64 y la pone en el enlace
+            enlace.href = cv.toDataURL("image/png");
+            // Hace click en él
             enlace.click();
+            actualizar();
         }
 
+        // Función que muestra en consola todo los objetos 
         function viewObjects() {
             for (var i = 0; i < objetos.length; i++) {
                 console.log('objetos[' + i
@@ -435,7 +557,6 @@
                     + ', type:' + objetos[i].type
                 );
             }
-
         }
 
         function crearObjetos() {
@@ -463,29 +584,32 @@
         // funcion que revisa que funcion de los objetos esta seleccionada
         function radioSelected(event) {
             if (radioSelect == "selector") {
+                // objetoType = null;
                 // console.log("1 " + radioSelect);
                 // llamar a la funcion de seleccion
             }
             else if (radioSelect == "text") {
+                // objetoType = ;
                 // console.log("2 " + radioSelect);
                 // llamar a la funcion de crear texto
+                createObject(event);
+            }
+            else if (radioSelect == "rectangleFill") {
+                // objetoType = null;
+                // console.log("3 " + radioSelect);
+                // llamar a la funcion de crear objeto
+                createObject(event);
             }
             else if (radioSelect == "rectangleStroke") {
                 // console.log("3 " + radioSelect);
                 // llamar a la funcion de crear objeto
                 createObject(event);
             }
-            else if (radioSelect == "rectangleFill") {
-                // console.log("3 " + radioSelect);
-                // llamar a la funcion de crear objeto
-                // createObject(event);
-            }
             actualizar();
         }
 
         // función que selecciona la opción de selector (llamada despues de crear un objeto)
         function radioSelectSelector() {
-
             // Deselecciona la opcion activa si no es el selector
             if (radioSelect != "selector") {
                 document.getElementById("radioSelect_" + radioSelect).checked = false;
@@ -518,18 +642,37 @@
                 mouseDown_pos[1] = temp;
             }
 
-            objetos.push({
-                // x: event.clientX, y: event.clientY,
-                // width: 100, height: 100,
+            //revisa que tipo de objeto es
+            if (radioSelect == 'rectangleFill' || radioSelect == 'rectangleStroke') {
+                objetos.push({
+                    x: mouseDown_pos[0], y: mouseDown_pos[1],
+                    width: mouseUp_pos[0] - mouseDown_pos[0],
+                    height: mouseUp_pos[1] - mouseDown_pos[1],
+                    type: radioSelect,
+                });
+            }
+            else if (radioSelect == 'text') {
+                // console.log('size: ' + selected_font_size);
+                // console.log('type: ' + selected_font_type);
 
-                // x: mouseDown_pos[0], y: mouseDown_pos[1],
-                // width: 100, height: 100,
+                // contexto temporal para poder sacar medidas
+                let cx_temp = cx;
+                cx_temp.font = selected_font_size + " " + selected_font_type;
 
-                x: mouseDown_pos[0], y: mouseDown_pos[1],
-                width: mouseUp_pos[0] - mouseDown_pos[0], height: mouseUp_pos[1] - mouseDown_pos[1],
-                type: null,
+                objetoText = "Hola mundo"; //texto de prueba
 
-            });
+                objetos.push({
+                    x: mouseDown_pos[0], y: mouseDown_pos[1],
+                    // width: null, height: null,
+                    width: cx_temp.measureText(objetoText).width,
+                    height: cx_temp.measureText(objetoText).height,
+                    text: objetoText,
+                    type: radioSelect,
+                    font: selected_font_size + " " + selected_font_type,
+                    // font: "bold 30px arial", //estilo de texto
+
+                });
+            }
         }
 
         // 
@@ -548,25 +691,21 @@
             //obtengo info de canvas (x,y,width,height...)
             canvas_info = canvas.getBoundingClientRect();
 
-            // console.log("realcanvasx: " + canvas_info.x);
-            // console.log("realcanvasy: " + canvas_info.y);
-
-            // crearObjetos();
-
             actualizar();
 
             // Cuando se presiona el mouse en el canvas
             cv.onmousedown = function (event) {
-                // console.log("event.clientXY " + event.clientX + ", " + event.clientY);
+                // Guardo el estado de que el mouse fue presionado
                 isMousePressed = true;
                 // Guarda la posicion donde se dio click al mouse
                 mouseDown_pos = [event.clientX, event.clientY]
-                // console.log("mouseDown_pos: " + mouseDown_pos);
 
                 // radioSelected(event);
                 // console.log("event.clientXY " + event.clientY + ", " + event.clientX);
 
-                selectObject();
+                if (radioSelect == 'selector') {
+                    selectObject();
+                }
 
 
             }

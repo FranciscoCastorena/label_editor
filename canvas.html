@@ -182,22 +182,40 @@
                             <!-- </div> -->
 
                             <!-- <div class="row"> -->
-                                <label>
-                                    <input type="radio" id="radioSelect_line" name="radioSelect"
-                                        value="line">
-                                    \
-                                    <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
-                                </label>
-                                <!-- </div> -->
-    
-                                <!-- <div class="row"> -->
-                                <label>
-                                    <input type="radio" id="radioSelect_rectangleStroke" name="radioSelect"
-                                        value="rectangleStroke">
-                                    ▭
-                                    <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
-                                </label>
-                                <!-- </div> -->
+                            <label>
+                                <input type="radio" id="radioSelect_circleFill" name="radioSelect" value="circleFill">
+                                ●
+                                <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
+                            </label>
+                            <!-- </div> -->
+
+                            <!-- <div class="row"> -->
+                            <label>
+                                <input type="radio" id="radioSelect_circleStroke" name="radioSelect"
+                                    value="circleStroke">
+                                ○
+                                <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
+                            </label>
+
+
+
+                            <!-- <div class="row"> -->
+                            <!-- <label> -->
+                            <!-- <input type="radio" id="radioSelect_line" name="radioSelect" -->
+                            <!-- value="line"> -->
+                            <!-- \ -->
+                            <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
+                            <!-- </label> -->
+                            <!-- </div> -->
+
+                            <!-- <div class="row"> -->
+                            <!-- <label> -->
+                            <!-- <input type="radio" id="radioSelect_rectangleStroke" name="radioSelect" -->
+                            <!-- value="rectangleStroke"> -->
+                            <!-- ○ -->
+                            <!-- <img src="https://via.placeholder.com/40x60/b0f/fff&text=B"> -->
+                            <!-- </label> -->
+                            <!-- </div> -->
                         </div>
                     </div>
                     <!-- ./ end FIGURES -->
@@ -416,7 +434,6 @@
             let selectColor = document.getElementById('ink_color');
             let selectFontSize = document.getElementById('font_size');
             let selectFontType = document.getElementById('font_type');
-            // console.log('fillSelects');
 
             // llena el select de color
             for (var i = 0; i < colors.length; i++) {
@@ -443,8 +460,8 @@
             }
         }
 
-        // Función que actualiza el canvas
-        function actualizar() {
+        // Función que dibuja los elementos en el canvas
+        function render() {
             // Dibuja el color del fondo
             cx.fillStyle = '#f0f0f0';
             // Define el tamaño del fondo
@@ -456,10 +473,7 @@
             // Dibuja objetos
             for (var i = 0; i < objetos.length; i++) {
                 // for (var i = objetos.length - 1; i >= 0; i--) {
-                // console.log('objetos.length:' + objetos.length);
-                // console.log('i:' + i);
 
-                // cx.fillStyle = objetos[i].color;
                 // Pone el color seleccionado para el estilo delineado y el llenado
                 cx.fillStyle = selected_color;
                 cx.strokeStyle = selected_color;
@@ -472,9 +486,29 @@
                     //     // Las empieza a dibujar
                     cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
                 }
+                else if (objetos[i].type == 'circleStroke') {
+                    let radius = objetos[i].radius;
+                    let posX = (objetos[i].x - canvas_info.x);
+                    let posY = (objetos[i].y - canvas_info.y);
+
+                    // Las empieza a dibujar
+                    cx.beginPath();
+                    cx.arc(posX, posY, radius, 0, 2 * Math.PI, false);
+                    cx.stroke();
+                    cx.closePath();
+                }
+                else if (objetos[i].type == 'circleFill') {
+                    let radius = objetos[i].radius;
+                    let posX = (objetos[i].x - canvas_info.x);
+                    let posY = (objetos[i].y - canvas_info.y);
+                    // Las empieza a dibujar
+                    cx.beginPath();
+                    cx.arc(posX, posY, radius, 0, 2 * Math.PI, false);
+                    cx.fill();
+                    cx.closePath();
+                }
                 else if (objetos[i].type == 'text') {
                     // cx.beginPath() //iniciar ruta
-                    // cx.font = "bold 20px arial"; //estilo de texto
                     cx.font = objetos[i].font;
                     // cx.strokeText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y + 20); //texto con método stroke
                     cx.fillText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height); //texto con método fill
@@ -482,18 +516,22 @@
                 else if (objetos[i].type == 'line') {
                     //     // Las empieza a dibujar
                     // cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+                    // cx.strokeRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
+
                     cx.beginPath();
-                    cx.moveTo(objetos[i].x, objetos[i].y);
-                    cx.lineTo(objetos[i].width, objetos[i].height);
+                    cx.moveTo(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y);
+                    cx.lineTo(objetos[i].width - canvas_info.x, objetos[i].height - canvas_info.y);
                     cx.stroke();
                     // cx.closePath();
-                    
-                }
 
-                // console.log("canvas_info.xy " + canvas_info.x + "," + canvas_info.y);
-                // console.log("objetos[" + i + "].xy " + objetos[i].x + "," + objetos[i].y);
+                }
             }
             cx.restore();
+        }
+
+        // Función que actualiza el canvas
+        function actualizar() {
+            render();
 
             // Dibuja la marca de agua
             cx.save();
@@ -505,62 +543,33 @@
 
         // Función que actualiza el canvas sin la marca de agua
         function actualizar2() {
-            // Dibuja el color del fondo
-            cx.fillStyle = '#f0f0f0';
-            // Define el tamaño del fondo
-            cx.fillRect(0, 0, canvas_width, canvas_height);
-
-            cx.save();
-            // Dibuja objetos
-            for (var i = 0; i < objetos.length; i++) {
-                // for (var i = objetos.length - 1; i >= 0; i--) {
-                // console.log('objetos.length:' + objetos.length);
-                // console.log('i:' + i);
-
-                // cx.fillStyle = objetos[i].color;
-                // Pone el color seleccionado para el estilo delineado y el llenado
-                cx.fillStyle = selected_color;
-                cx.strokeStyle = selected_color;
-
-                if (objetos[i].type == 'rectangleStroke') {
-                    // Las empieza a dibujar
-                    cx.strokeRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
-                }
-                else if (objetos[i].type == 'rectangleFill') {
-                    //     // Las empieza a dibujar
-                    cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
-                }
-                else if (objetos[i].type == 'text') {
-                    // cx.beginPath() //iniciar ruta
-                    // cx.font = "bold 20px arial"; //estilo de texto
-                    cx.font = objetos[i].font;
-                    cx.strokeText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y + 20); //texto con método stroke
-                    cx.fillText(objetos[i].text, objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y); //texto con método fill
-                }
-                else if (objetos[i].type == 'line') {
-                    //     // Las empieza a dibujar
-                    // cx.fillRect(objetos[i].x - canvas_info.x, objetos[i].y - canvas_info.y, objetos[i].width, objetos[i].height);
-                    ctx.beginPath();
-                    ctx.moveTo(objetos[i].x, objetos[i].y);
-                    ctx.lineTo(objetos[i].width, objetos[i].height);
-                    ctx.closePath();
-                    ctx.stroke();
-                }
-
-                // console.log("canvas_info.xy " + canvas_info.x + "," + canvas_info.y);
-                // console.log("objetos[" + i + "].xy " + objetos[i].x + "," + objetos[i].y);
-            }
-            cx.restore();
+            render();
         }
-
 
         // Función que selecciona el objeto cuando el selector esta activo
         function selectObject() {
             // Recorre todos los objetos
-            // for (var i = 0; i < objetos.length; i++) {
             for (var i = objetos.length - 1; i >= 0; i--) {
                 // Revisa que se haya dado clic en un objeto
-                if (objetos[i].x < event.clientX
+
+                //si es un circulo
+                if (objetos[i].type == 'circleStroke' || objetos[i].type == 'circleFill') {
+                    if (objetos[i].x - objetos[i].radius < event.clientX
+                        && (objetos[i].width + objetos[i].x > event.clientX)
+                        && objetos[i].y - objetos[i].radius < event.clientY
+                        && (objetos[i].height + objetos[i].y > event.clientY)
+                    ) {
+                        // Pone el seleccionado como objeto actual
+                        objetoActual = objetos[i];
+                        objetoActualNum = i;
+
+                        // Cambioa inicioY e inicioX
+                        inicioY = event.clientY - objetos[i].y;
+                        inicioX = event.clientX - objetos[i].x;
+                        break;
+                    }
+                }
+                else if (objetos[i].x < event.clientX
                     && (objetos[i].width + objetos[i].x > event.clientX)
                     && objetos[i].y < event.clientY
                     && (objetos[i].height + objetos[i].y > event.clientY)
@@ -581,6 +590,7 @@
                     // console.log("inicio YX " + inicioY + ", " + inicioX);
                     break;
                 }
+
             }
 
         }
@@ -590,6 +600,18 @@
             if (objetoActual != null) {
                 objetoActual.x = event.clientX - inicioX;
                 objetoActual.y = event.clientY - inicioY;
+
+                //cuando son lineas se tiene que ajustar tambien el punto final
+                // if (objetoActual.type == 'line') {
+                // objetoActual.width = event.client.x + objetoActual.width;
+                // objetoActual.height = event.clientY.y + objetoActual.height;
+                // objetoActual.width = objetoActual.width - canvas_info.x;
+                // objetoActual.height = objetoActual.height - canvas_info.x;
+
+                // cx.moveTo(objetos[i].x  - canvas_info.x, objetos[i].y  - canvas_info.y);
+                // cx.lineTo(objetos[i].width - canvas_info.x, objetos[i].height - canvas_info.y);
+                // }
+
                 if (isMousePressed) {
                     actualizar();
                 }
@@ -633,61 +655,18 @@
                     + ', type:' + objetos[i].type
                     + ', text:' + objetos[i].text
                     + ', font:' + objetos[i].font
+                    + ', radius:' + objetos[i].radius
                 );
             }
         }
 
-        function crearObjetos() {
-            // agregar objetos de prueba
-            objetos.push({
-                x: 0, y: 0,
-                width: 100, height: 200,
-                color: selected_color
-                // color: '#00f'
-            });
-            objetos.push({
-                x: 300, y: 150,
-                width: 50, height: 100,
-                color: selected_color
-                // color: '#f00'
-            });
-            objetos.push({
-                x: 120, y: 50,
-                width: 50, height: 50,
-                color: selected_color
-                // color: '#0f0'
-            });
-        }
-
         // funcion que revisa que funcion de los objetos esta seleccionada
         function radioSelected(event) {
-            if (radioSelect == "selector") {
-                // objetoType = null;
-                // console.log("1 " + radioSelect);
-                // llamar a la funcion de seleccion
-            }
-            else if (radioSelect == "text") {
-                // objetoType = ;
-                // console.log("2 " + radioSelect);
-                // llamar a la funcion de crear texto
+            if (radioSelect != "selector") {
+                // console.log("radioSelect: " + radioSelect);
                 createObject(event);
             }
-            else if (radioSelect == "rectangleFill") {
-                // objetoType = null;
-                // console.log("3 " + radioSelect);
-                // llamar a la funcion de crear objeto
-                createObject(event);
-            }
-            else if (radioSelect == "rectangleStroke") {
-                // console.log("3 " + radioSelect);
-                // llamar a la funcion de crear objeto
-                createObject(event);
-            }
-            else if (radioSelect == "line") {
-                // console.log("3 " + radioSelect);
-                // llamar a la funcion de crear objeto
-                createObject(event);
-            }
+
             actualizar();
         }
 
@@ -703,22 +682,16 @@
             radioSelect = "selector";
         }
 
-        // funcion que crea texto
-        function createText() {
-
-        }
-
         // funcion que crea objetos
         function createObject(event) {
-
             //esto arregla un bug al momento de dibujar, intercambia los valores de cuando se presiona y cuando se suelta
             // no aplica en texto
-            if (mouseUp_pos[0] < mouseDown_pos[0] && radioSelect != 'text') {
+            if (mouseUp_pos[0] < mouseDown_pos[0] && radioSelect != 'text' && radioSelect != 'line') {
                 let temp = mouseUp_pos[0];
                 mouseUp_pos[0] = mouseDown_pos[0];
                 mouseDown_pos[0] = temp;
             } //esto arregla un bug al momento de dibujar, intercambia los valores de cuando se presiona y cuando se suelta
-            if (mouseUp_pos[1] < mouseDown_pos[1] && radioSelect != 'text') {
+            if (mouseUp_pos[1] < mouseDown_pos[1] && radioSelect != 'text' && radioSelect != 'line') {
                 let temp = mouseUp_pos[1];
                 mouseUp_pos[1] = mouseDown_pos[1];
                 mouseDown_pos[1] = temp;
@@ -733,39 +706,45 @@
                     type: radioSelect,
                 });
             }
-            else if (radioSelect == 'text' && objetoText) {
-                // console.log('size: ' + selected_font_size);
-                // console.log('type: ' + selected_font_type);
+            else if (radioSelect == 'circleFill' || radioSelect == 'circleStroke') {
+                // reviso si el ancho o el alto es mas largo y lo asigno como radio
+                let circleWidth = mouseUp_pos[0] - mouseDown_pos[0];
+                let circleHeight = mouseUp_pos[1] - mouseDown_pos[1];
+                let circleRadio = circleWidth / 2;
 
+                if (circleHeight > circleWidth) {
+                    circleRadio = circleHeight / 2;
+                }
+
+                objetos.push({
+                    x: mouseDown_pos[0] + circleRadio,
+                    y: mouseDown_pos[1] + circleRadio,
+                    radius: circleRadio,
+                    width: circleRadio,
+                    height: circleRadio,
+                    type: radioSelect,
+                });
+            }
+            else if (radioSelect == 'text' && objetoText) {
                 // contexto temporal para poder sacar medidas
                 let cx_temp = cx;
                 cx_temp.font = selected_font_size + " " + selected_font_type;
 
-                // objetoText = "Hola mundo"; //texto de prueba
-
                 let text = cx.measureText(objetoText);
-                console.log('text.actualBoundingBoxAscent' + text.actualBoundingBoxAscent);
-                console.log('text.actualBoundingBoxRight' + text.actualBoundingBoxRight);
-                console.log('text.actualBoundingBoxDescent' + text.actualBoundingBoxDescent);
-                
 
                 objetos.push({
                     x: mouseUp_pos[0], y: mouseUp_pos[1],
-                    // width: null, height: null,
-                    // width: cx_temp.measureText(objetoText).width,
-                    // height: cx_temp.measureText(objetoText).height,
                     width: text.actualBoundingBoxRight,
                     height: text.actualBoundingBoxDescent,
                     text: objetoText,
                     type: radioSelect,
-                    font: selected_font_size + " " + selected_font_type,
-                    // font: "bold 30px arial", //estilo de texto
-
+                    font: selected_font_size + " " + selected_font_type, //"bold 30px arial" estilo de texto
                 });
             }
             else if (radioSelect == 'line') {
                 objetos.push({
-                    x: mouseDown_pos[0], y: mouseDown_pos[1],
+                    x: mouseDown_pos[0],
+                    y: mouseDown_pos[1],
                     width: mouseUp_pos[0],
                     height: mouseUp_pos[1],
                     type: radioSelect,
@@ -798,14 +777,9 @@
                 // Guarda la posicion donde se dio click al mouse
                 mouseDown_pos = [event.clientX, event.clientY]
 
-                // radioSelected(event);
-                // console.log("event.clientXY " + event.clientY + ", " + event.clientX);
-
                 if (radioSelect == 'selector') {
                     selectObject();
                 }
-
-
             }
 
             // Cuando se mueve el mouse en el canvas
@@ -825,14 +799,12 @@
                 // Guarda la posicion donde se solto al mouse
                 mouseUp_pos = [event.clientX, event.clientY]
 
-                console.log("C mouseDown_pos: " + mouseDown_pos);
-                console.log("C mouseUp_pos: " + mouseUp_pos);
+                // console.log("C mouseDown_pos: " + mouseDown_pos);
+                // console.log("C mouseUp_pos: " + mouseUp_pos);
                 // Deja vacío el objeto actual
                 objetoActual = null;
 
                 radioSelected(event);
-
-
 
                 radioSelectSelector();
             }
@@ -851,27 +823,6 @@
         crossorigin="anonymous"></script>
     <!-- /.end BOOTSTRAP -->
 
-    <style>
-        /* HIDE RADIO */
-        /* [type=radio] { 
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-        } */
-
-        /* IMAGE STYLES */
-        /* [type=radio] + img {
-        cursor: pointer;
-        } */
-
-        /* CHECKED STYLES */
-        /* [type=radio]:checked + img {
-        outline: 2px solid #f00;
-        } */
-    </style>
-
 </body>
-
 
 </html>
